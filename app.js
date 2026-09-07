@@ -4,6 +4,54 @@
    deep-linking, perfume add/edit/delete, and dynamic journal/about editor.
    ========================================================================== */
 
+// GÜVENLİK: Basit şifre koruması
+const ADMIN_PASSWORD_HASH = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"; // "test" için hash
+const ADMIN_SESSION_KEY = "scent_index_admin_session";
+
+function hashPassword(password) {
+  // Basit SHA-256 implementasyonu (client-side)
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  return crypto.subtle.digest('SHA-256', data).then(hash => {
+    const hashArray = Array.from(new Uint8Array(hash));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+  });
+}
+
+function isAdminSessionValid() {
+  const session = sessionStorage.getItem(ADMIN_SESSION_KEY);
+  return session === ADMIN_PASSWORD_HASH;
+}
+
+function setAdminSession() {
+  sessionStorage.setItem(ADMIN_SESSION_KEY, ADMIN_PASSWORD_HASH);
+}
+
+function clearAdminSession() {
+  sessionStorage.removeItem(ADMIN_SESSION_KEY);
+}
+
+async function verifyAdminPassword(password) {
+  const hashedPassword = await hashPassword(password);
+  return hashedPassword === ADMIN_PASSWORD_HASH;
+}
+
+async function promptAdminPassword() {
+  const password = prompt("Küratör paneline erişmek için şifre girin:");
+  if (!password) return false;
+  
+  const isValid = await verifyAdminPassword(password);
+  if (isValid) {
+    setAdminSession();
+    showToast("Küratör paneline erişim sağlandı.");
+    return true;
+  } else {
+    showToast("Hatalı şifre! Erişim reddedildi.");
+    return false;
+  }
+}
+
 // 1. TEMEL VARSAYILAN KOLEKSİYON (İLK AÇILIŞ İÇİN 27 PARFÜM)
 const defaultFragranceCollection = [
   {
@@ -1037,7 +1085,13 @@ function setCuratorOpenState(isOpen) {
   document.body.style.overflow = isOpen ? "hidden" : "";
 }
 
-function openCuratorDrawer(initialTab = "tabPerfume", populateItem = null) {
+async function openCuratorDrawer(initialTab = "tabPerfume", populateItem = null) {
+  // Güvenlik kontrolü
+  if (!isAdminSessionValid()) {
+    const authenticated = await promptAdminPassword();
+    if (!authenticated) return;
+  }
+
   previousActiveElement = document.activeElement;
   const drawer = document.getElementById("curatorDrawer");
   if (!drawer) {
@@ -1366,6 +1420,11 @@ function setupEventListeners() {
   safeAddListener("curatorToggleBtn", "click", () => openCuratorDrawer());
   safeAddListener("curatorClose", "click", closeCuratorDrawer);
   safeAddListener("curatorBackdrop", "click", closeCuratorDrawer);
+  safeAddListener("btnAdminLogout", "click", () => {
+    clearAdminSession();
+    closeCuratorDrawer();
+    showToast("Admin oturumu kapatıldı.");
+  });
 
   // Küratör Sekme Değişimi
   document.querySelectorAll(".curator-tab").forEach((tab) => {
@@ -1384,13 +1443,27 @@ function setupEventListeners() {
   safeAddListener("textsForm", "submit", handleTextsFormSubmit);
 
   // Modal İçi Düzenle & Sil Butonları
-  safeAddListener("btnModalEdit", "click", () => {
+  safeAddListener("btnModalEdit", "click", async () => {
     if (!currentActivePerfume) return;
+    
+    // Güvenlik kontrolü
+    if (!isAdminSessionValid()) {
+      const authenticated = await promptAdminPassword();
+      if (!authenticated) return;
+    }
+    
     const itemToEdit = currentActivePerfume;
     closeDetailModal();
     openCuratorDrawer("tabPerfume", itemToEdit);
   });
-  safeAddListener("btnModalDelete", "click", deleteCurrentPerfume);
+  safeAddListener("btnModalDelete", "click", async () => {
+    // Güvenlik kontrolü
+    if (!isAdminSessionValid()) {
+      const authenticated = await promptAdminPassword();
+      if (!authenticated) return;
+    }
+    deleteCurrentPerfume();
+  });
 
   // Yedekleme Butonları
   safeAddListener("btnExportJson", "click", exportArchiveAsJson);
@@ -1445,7 +1518,14 @@ function setupEventListeners() {
       if (curatorDrawer && curatorDrawer.classList.contains("active")) {
         closeCuratorDrawer();
       } else {
-        openCuratorDrawer();
+        // Async function olduğu için async wrapper kullanıyoruz
+        (async () => {
+          if (!isAdminSessionValid()) {
+            const authenticated = await promptAdminPassword();
+            if (!authenticated) return;
+          }
+          openCuratorDrawer();
+        })();
       }
       return;
     }
