@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Scent Index — Kişisel Parfüm Arşivi</title>
+  <meta name="description" content="Kokuların, hatıraların ve duyusal nesnelerin kişisel editoryal arşivi." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Site Üstbilgisi & Gezinti -->
+  <header class="site-header">
+    <a class="logo" href="#collection" aria-label="The Scent Index Ana Sayfa">THE SCENT INDEX</a>
+    <nav aria-label="Ana Menü">
+      <a class="nav-link active" href="#collection" id="navCollection">KOLEKSİYON</a>
+      <a class="nav-link" href="#journal" id="navJournal">GÜNCE</a>
+      <a class="nav-link" href="#about" id="navAbout">HAKKINDA</a>
+    </nav>
+    <div class="header-actions">
+      <!-- Küratör Yönetim Paneli Açma Butonu -->
+      <button type="button" class="curator-toggle-btn" id="curatorToggleBtn" aria-label="Küratör Yönetim Paneli" aria-controls="curatorDrawer" aria-expanded="false" title="Küratör Yönetim Paneli (Kısayol: Alt + E)">
+        <span class="curator-icon">✎</span> <span class="curator-btn-label">KÜRATÖR</span>
+      </button>
+      <button class="search-toggle-btn" id="searchToggleBtn" aria-controls="searchDrawer" aria-label="Canlı Arama Çubuğunu Aç/Kapat" aria-expanded="false">
+        <span class="search-icon">⌕</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Editoryal Canlı Arama Paneli -->
+  <div class="search-drawer" id="searchDrawer" aria-hidden="true">
+    <div class="search-drawer-inner">
+      <span class="search-prefix">⌕</span>
+      <input 
+        type="search" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Parfüm adı, marka, nota, parfümör veya mevsim arayın (Kısayol: /)..." 
+        autocomplete="off" 
+        spellcheck="false"
+      />
+      <button class="search-clear-btn" id="searchClearBtn" aria-label="Aramayı Temizle" title="Temizle">✕</button>
+    </div>
+  </div>
+
+  <main>
+    <!-- Giriş / Hero Bölümü -->
+    <section class="intro" id="collection">
+      <div class="intro-index">Nº 01</div>
+      <div class="intro-main">
+        <p class="eyebrow">KİŞİSEL PARFÜM KOLEKSİYONUM</p>
+        <h1>THE SCENT<br>INDEX</h1>
+        <p class="intro-copy">Kokuların, hatıraların ve duyusal<br>nesnelerin kişisel arşivi.</p>
+      </div>
+      <div class="count" id="heroCount">27<br><span>PARFÜM</span></div>
+    </section>
+
+    <!-- Toolbar: Koku Ailesi Filtreleri, Sıralama & Canlı Sayaç -->
+    <section class="toolbar">
+      <div class="filters" role="group" aria-label="Koku Ailesi Filtreleri">
+        <button class="filter active" data-filter="all" aria-pressed="true">TÜMÜ</button>
+        <button class="filter" data-filter="fresh" aria-pressed="false">FERAH</button>
+        <button class="filter" data-filter="woody" aria-pressed="false">ODUNSU</button>
+        <button class="filter" data-filter="floral" aria-pressed="false">ÇİÇEKSİ</button>
+        <button class="filter" data-filter="sweet" aria-pressed="false">TATLI</button>
+        <button class="filter" data-filter="leather/oriental" aria-pressed="false">DERİ / ORYANTAL</button>
+      </div>
+
+      <div class="toolbar-controls">
+        <div class="sort-wrapper">
+          <label for="sortSelect" class="sort-label">SIRALA:</label>
+          <select id="sortSelect" class="editorial-select" aria-label="Parfümleri Sırala">
+            <option value="default">VARSAYILAN ARŞİV</option>
+            <option value="rating-desc">EN YÜKSEK PUAN</option>
+            <option value="az">İSİM (A — Z)</option>
+            <option value="za">İSİM (Z — A)</option>
+            <option value="year-desc">ÇIKIŞ YILI (YENİDEN ESKİYE)</option>
+            <option value="year-asc">ÇIKIŞ YILI (ESKİDEN YENİYE)</option>
+          </select>
+        </div>
+        <div class="sort-count" id="sortCount" aria-live="polite">27 PARFÜM</div>
+      </div>
+    </section>
+
+    <!-- Parfüm Kartları Galerisi -->
+    <section class="collection-grid" id="collectionGrid"></section>
+  </main>
+
+  <!-- Altbilgi -->
+  <footer class="site-footer">
+    <div>THE SCENT INDEX Nº 01</div>
+    <div>KÜRETE EDİLMİŞ KOKU ARŞİVİ</div>
+    <div>© 2026 ÜMİT SEZEN</div>
+  </footer>
+
+  <!-- Zenginleştirilmiş Koyu Matcha Detay Modalı -->
+  <div class="detail-modal" id="detailModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalName">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-inner" tabindex="-1">
+      <button class="modal-close" id="modalClose" aria-label="Pencereyi Kapat">×</button>
+      
+      <div class="modal-body">
+        <div class="modal-header-meta">
+          <p class="modal-brand-eyebrow" id="modalBrand"></p>
+          <h2 class="modal-title" id="modalName"></h2>
+          <p class="modal-meta-specs" id="modalMeta"></p>
+          <p class="modal-perfumer-line" id="modalPerfumer"></p>
+        </div>
+
+        <div class="modal-badges-row">
+          <span class="badge-mood" id="modalMood"></span>
+          <span class="badge-rating" id="modalRating"></span>
+        </div>
+
+        <div class="modal-image-wrap" id="modalImage"></div>
+
+        <!-- Notalar Piramidi (Üst, Kalp, Dip) -->
+        <div class="pyramid-container">
+          <div class="pyramid-tier">
+            <span class="tier-label">ÜST NOTALAR</span>
+            <div class="pill-group" id="modalTopNotes"></div>
+          </div>
+          <div class="pyramid-tier">
+            <span class="tier-label">KALP NOTALARI</span>
+            <div class="pill-group" id="modalHeartNotes"></div>
+          </div>
+          <div class="pyramid-tier">
+            <span class="tier-label">DİP NOTALAR</span>
+            <div class="pill-group" id="modalBaseNotes"></div>
+          </div>
+        </div>
+
+        <!-- Uygun Mevsim Rozetleri -->
+        <div class="seasons-container">
+          <span class="seasons-label">MEVSİMSEL UYUM</span>
+          <div class="seasons-badges" id="modalSeasons"></div>
+        </div>
+
+        <div class="detail-divider"></div>
+
+        <!-- Editoryal İnceleme & İzlenim -->
+        <div class="modal-impression">
+          <p class="personal-label">KİŞİSEL İZLENİMİM</p>
+          <blockquote class="personal-copy" id="modalReview"></blockquote>
+        </div>
+
+        <!-- Küratör Hızlı Aksiyonları (Düzenle / Çıkar) -->
+        <div class="modal-admin-actions">
+          <button type="button" class="btn-modal-action btn-edit-perfume" id="btnModalEdit">✎ Bu Parfümü Düzenle</button>
+          <button type="button" class="btn-modal-action btn-delete-perfume" id="btnModalDelete">✕ Koleksiyondan Çıkar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Günce & Hakkında Yan Çekmecesi -->
+  <aside class="editorial-drawer" id="editorialDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="drawerHeading">
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
+    <div class="drawer-panel" tabindex="-1">
+      <div class="drawer-header">
+        <span class="drawer-eyebrow" id="drawerHeading">ARŞİV KÜTÜĞÜ &amp; YAZILAR</span>
+        <button class="drawer-close" id="drawerClose" aria-label="Çekmeceyi Kapat">×</button>
+      </div>
+
+      <div class="drawer-content">
+        <!-- Günce Bölümü -->
+        <section class="drawer-section" id="drawerJournal">
+          <span class="section-tag">01 / GÜNCE</span>
+          <h2 id="drawerJournalTitle">Kokunun Ontolojisi ve Hafıza Mimarisi</h2>
+          <p class="drawer-lead" id="drawerJournalLead">
+            Koku, insan bilincinin zamana karşı kurduğu en dolaysız ve korunaklı sığınağıdır. Bir narenciye kabuğunun havaya saçılan uçucu yağı, ten üzerinde yavaşça ısınan kadim bir reçine ya da nemli bir sedir ağacı lifi; unutulduğu sanılan bir sokak köşesini, bir akşamüstü ışığını ve kişisel tarihin kırılma anlarını anında şimdiye taşır.
+          </p>
+          <p id="drawerJournalBody">
+            The Scent Index, kokuyu geçici bir tüketim nesnesi değil; mekânların, duyuların ve içsel seyahatlerin mimari birer bileşeni olarak belgeler. Bu editoryal arşiv, modern parfümörlüğün kimyasal kesinliği ile şiirsel hafızanın kesiştiği alanda konumlanır.
+          </p>
+        </section>
+
+        <div class="drawer-divider"></div>
+
+        <!-- Hakkında Bölümü -->
+        <section class="drawer-section" id="drawerAbout">
+          <span class="section-tag">02 / HAKKINDA</span>
+          <h3 id="drawerAboutTitle">Kürasyon Felsefesi ve Seçki Kriterleri</h3>
+          <p id="drawerAboutLead">
+            Arşivdeki 27 koku; tasarım dengesi, piramit yapısının kusursuzluğu, malzeme kalitesi ve tendeki karakter derinliği temel alınarak seçilmiştir. Niş parfüm evlerinin cüretkâr extrait formülasyonlarından, modern tasarımcı klasiklerinin rafine akorlarına uzanan bu seçki aşağıdaki ilkelerle derlenmiştir:
+          </p>
+          <ul class="drawer-criteria-list">
+            <li><strong>Piramidal Geçiş:</strong> Açılıştaki uçucu moleküllerden dipteki rezonans tabakasına kadar tutarlı bir hikâye anlatımı.</li>
+            <li><strong>Mevsimsel ve Mekânsal Uyum:</strong> İklimin nemi, sıcaklığı ve hava sirkülasyonuyla organik bir bağ kurabilme yetisi.</li>
+            <li><strong>Özgün Kimlik:</strong> Trendlerin kopyası olmayan, tenden havaya yayıldığında kendi imzasını açıkça hissettiren güçlü silaj.</li>
+          </ul>
+        </section>
+
+        <div class="drawer-footer">
+          <div>THE SCENT INDEX ARŞİVİ</div>
+          <div>İSTANBUL'DA DERLENDİ • 2026</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- KÜRATÖR YÖNETİM ÇEKMECESİ (CMS PANEL) -->
+  <aside class="curator-drawer" id="curatorDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="curatorTitle">
+    <div class="curator-backdrop" id="curatorBackdrop"></div>
+    <div class="curator-panel" tabindex="-1">
+      <div class="curator-header">
+        <div>
+          <span class="curator-eyebrow">ARŞİV KÜTÜĞÜ &amp; CMS</span>
+          <h2 id="curatorTitle">Küratör Paneli</h2>
+        </div>
+        <button class="curator-close" id="curatorClose" aria-label="Yönetim Panelini Kapat">×</button>
+      </div>
+
+      <!-- Panel Sekmeleri -->
+      <div class="curator-tabs">
+        <button type="button" class="curator-tab active" data-tab="tabPerfume">PARFÜM YÖNETİMİ</button>
+        <button type="button" class="curator-tab" data-tab="tabTexts">GÜNCE &amp; HAKKINDA</button>
+        <button type="button" class="curator-tab" data-tab="tabBackup">YEDEK &amp; DIŞA AKTAR</button>
+      </div>
+
+      <!-- Sekme 1: Parfüm Ekleme / Düzenleme Formu -->
+      <div class="curator-tab-content active" id="tabPerfume">
+        <form id="perfumeForm" class="curator-form">
+          <input type="hidden" id="formPerfumeId" value="" />
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="formBrand">Marka *</label>
+              <input type="text" id="formBrand" required placeholder="Örn: Bvlgari" />
+            </div>
+            <div class="form-group flex-1">
+              <label for="formName">Parfüm Adı *</label>
+              <input type="text" id="formName" required placeholder="Örn: Tygar" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="formPerfumer">Parfümör (Burun)</label>
+              <input type="text" id="formPerfumer" placeholder="Örn: Jacques Cavallier" />
+            </div>
+            <div class="form-group flex-1">
+              <label for="formConcentration">Konsantrasyon</label>
+              <select id="formConcentration">
+                <option value="Eau de Parfum">Eau de Parfum</option>
+                <option value="Extrait de Parfum">Extrait de Parfum</option>
+                <option value="Parfum">Parfum</option>
+                <option value="Parfum Intense">Parfum Intense</option>
+                <option value="Elixir de Parfum">Elixir de Parfum</option>
+                <option value="Eau de Toilette">Eau de Toilette</option>
+                <option value="Eau de Toilette Intense">Eau de Toilette Intense</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="formFamily">Ana Koku Ailesi *</label>
+              <select id="formFamily" required>
+                <option value="fresh">Ferah (Fresh / Citrus)</option>
+                <option value="woody">Odunsu (Woody)</option>
+                <option value="floral">Çiçeksi (Floral)</option>
+                <option value="sweet">Tatlı / Gurme (Sweet / Gourmand)</option>
+                <option value="leather/oriental">Deri / Oryantal (Leather / Oriental)</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label for="formYear">Çıkış Yılı</label>
+              <input type="number" id="formYear" min="1900" max="2040" placeholder="Örn: 2016" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="formSize">Şişe Boyutu</label>
+              <input type="text" id="formSize" placeholder="Örn: 100 ml" />
+            </div>
+            <div class="form-group flex-1">
+              <label for="formRating">Puan (1 — 10): <strong id="formRatingVal">9.5</strong></label>
+              <input type="range" id="formRating" min="1" max="10" step="0.1" value="9.5" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="formMood">Ruh Hali &amp; Karakter (Virgülle ayırın)</label>
+            <input type="text" id="formMood" placeholder="Örn: Işıltılı, Canlı, Manyetik" />
+          </div>
+
+          <div class="form-group">
+            <label for="formTopNotes">Üst Notalar (Virgülle ayırın)</label>
+            <input type="text" id="formTopNotes" placeholder="Örn: Greyfurt, Işıltılı Bergamot" />
+          </div>
+
+          <div class="form-group">
+            <label for="formHeartNotes">Kalp Notaları (Virgülle ayırın)</label>
+            <input type="text" id="formHeartNotes" placeholder="Örn: Zencefil Kökü, Misk Otu Tohumu" />
+          </div>
+
+          <div class="form-group">
+            <label for="formBaseNotes">Dip Notalar (Virgülle ayırın)</label>
+            <input type="text" id="formBaseNotes" placeholder="Örn: Ambroksan, Odunsu Notalar" />
+          </div>
+
+          <div class="form-group">
+            <label>Uygun Mevsimler</label>
+            <div class="checkbox-row">
+              <label><input type="checkbox" name="formSeasons" value="İlkbahar" checked /> İlkbahar</label>
+              <label><input type="checkbox" name="formSeasons" value="Yaz" checked /> Yaz</label>
+              <label><input type="checkbox" name="formSeasons" value="Sonbahar" /> Sonbahar</label>
+              <label><input type="checkbox" name="formSeasons" value="Kış" /> Kış</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="formReview">Kişisel İnceleme / İzlenim</label>
+            <textarea id="formReview" rows="3" placeholder="Parfüm hakkındaki 1-2 editoryal cümleniz..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="formImage">Şişe Görseli URL veya Dosya Yolu</label>
+            <input type="text" id="formImage" placeholder="https://... veya assets/bottles/parfum.png" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-curator-submit" id="btnSavePerfume">Koleksiyona Kaydet</button>
+            <button type="button" class="btn-curator-reset" id="btnResetForm">Formu Temizle</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sekme 2: Günce & Hakkında Metinleri -->
+      <div class="curator-tab-content" id="tabTexts">
+        <form id="textsForm" class="curator-form">
+          <h3 class="form-subheading">Günce (Journal) İçeriği</h3>
+          <div class="form-group">
+            <label for="editJournalTitle">Günce Başlığı</label>
+            <input type="text" id="editJournalTitle" />
+          </div>
+          <div class="form-group">
+            <label for="editJournalLead">Giriş Vurgusu (İtalik Paragraf)</label>
+            <textarea id="editJournalLead" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editJournalBody">Ana Metin Paragrafı</label>
+            <textarea id="editJournalBody" rows="4"></textarea>
+          </div>
+
+          <div class="drawer-divider"></div>
+
+          <h3 class="form-subheading">Hakkında (About) İçeriği</h3>
+          <div class="form-group">
+            <label for="editAboutTitle">Hakkında Başlığı</label>
+            <input type="text" id="editAboutTitle" />
+          </div>
+          <div class="form-group">
+            <label for="editAboutLead">Hakkında Giriş Metni</label>
+            <textarea id="editAboutLead" rows="3"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-curator-submit">Metin Değişikliklerini Kaydet</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sekme 3: Yedekleme & Dışa Aktarma -->
+      <div class="curator-tab-content" id="tabBackup">
+        <div class="backup-card">
+          <h4>Koleksiyonu Yedekle (JSON İndir)</h4>
+          <p>Tüm parfümlerinizi, kişisel notlarınızı ve yazılarınızı tek bir <code>scent-index-archive.json</code> dosyası olarak bilgisayarınıza indirin.</p>
+          <button type="button" class="btn-curator-submit" id="btnExportJson">Arşivi JSON Olarak İndir</button>
+        </div>
+
+        <div class="drawer-divider"></div>
+
+        <div class="backup-card">
+          <h4>Yedekten Geri Yükle (JSON Yükle)</h4>
+          <p>Daha önce indirdiğiniz arşiv dosyasını seçerek koleksiyonunuzu anında geri yükleyin.</p>
+          <input type="file" id="inputFileImport" accept=".json" style="display:none" />
+          <button type="button" class="btn-curator-reset" id="btnTriggerImport">JSON Dosyası Seç ve Yükle</button>
+        </div>
+
+        <div class="drawer-divider"></div>
+
+        <div class="backup-card">
+          <h4 style="color: var(--cherry-accent);">Fabrika Ayarlarına Dön</h4>
+          <p>Tüm eklemelerinizi temizleyip orijinal 27 parçalık temel koleksiyona döner.</p>
+          <button type="button" class="btn-curator-danger" id="btnResetDefaults">Orijinal 27 Parfüme Sıfırla</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Bildirim Toast Çubuğu -->
+  <div class="scent-toast" id="scentToast" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
